@@ -11,8 +11,10 @@ interface EventCardProps {
   date: string;
   location: string;
   category: string;
-  participants: number;
-  maxParticipants: number;
+  participants?: number;
+  currentParticipants?: number;
+  maxParticipants?: number;
+  imageUrl?: string;
   image?: string;
 }
 
@@ -23,10 +25,13 @@ export const EventCard = ({
   date,
   location,
   category,
-  participants,
+  participants = 0,
+  currentParticipants,
   maxParticipants,
+  imageUrl,
   image,
 }: EventCardProps) => {
+  const displayImage = imageUrl || image;
   const getCategoryColor = (cat: string) => {
     switch (cat) {
       case "environment":
@@ -42,10 +47,10 @@ export const EventCard = ({
 
   return (
     <Card className="group overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-all duration-300 hover:-translate-y-1">
-      {image && (
+      {displayImage && (
         <div className="relative h-48 overflow-hidden">
           <img
-            src={image}
+            src={displayImage}
             alt={title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
@@ -76,7 +81,7 @@ export const EventCard = ({
         <div className="flex items-center gap-2 text-sm">
           <Users className="h-4 w-4 text-accent" />
           <span className="text-muted-foreground">
-            {participants}/{maxParticipants} người tham gia
+            {currentParticipants ?? participants}/{maxParticipants || '∞'} người tham gia
           </span>
         </div>
       </CardContent>

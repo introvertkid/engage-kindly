@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Navbar = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -28,12 +31,26 @@ export const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild>
-            <Link to="/login">Đăng nhập</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/register">Đăng ký</Link>
-          </Button>
+          {user ? (
+            <>
+              <span className="text-sm text-muted-foreground hidden md:inline">
+                Xin chào, {user.email}
+              </span>
+              <Button variant="ghost" onClick={signOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Đăng xuất
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link to="/auth">Đăng nhập</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/auth">Đăng ký</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>
