@@ -1,49 +1,44 @@
+import { useEffect, useState } from "react";
 import { EventCard } from "./EventCard";
-
-const sampleEvents = [
-  {
-    id: "1",
-    title: "Trồng cây xanh tại công viên Thống Nhất",
-    description: "Cùng nhau trồng 500 cây xanh để làm đẹp công viên và cải thiện không khí trong thành phố.",
-    date: "2025-10-15",
-    location: "Công viên Thống Nhất, TP.HCM",
-    category: "environment",
-    participants: 45,
-    maxParticipants: 100,
-  },
-  {
-    id: "2",
-    title: "Dọn rác bãi biển Vũng Tàu",
-    description: "Hoạt động làm sạch bãi biển và nâng cao ý thức bảo vệ môi trường biển.",
-    date: "2025-10-20",
-    location: "Bãi biển Vũng Tàu",
-    category: "environment",
-    participants: 30,
-    maxParticipants: 80,
-  },
-  {
-    id: "3",
-    title: "Từ thiện tại trại trẻ mồ côi",
-    description: "Mang yêu thương đến với các em nhỏ tại trại, tặng quà và tổ chức các hoạt động vui chơi.",
-    date: "2025-10-25",
-    location: "Trại Hòa Bình, Bình Dương",
-    category: "charity",
-    participants: 20,
-    maxParticipants: 50,
-  },
-  {
-    id: "4",
-    title: "Bình dân học vụ số cho người cao tuổi",
-    description: "Hướng dẫn người cao tuổi sử dụng smartphone và các ứng dụng cơ bản.",
-    date: "2025-11-01",
-    location: "Trung tâm văn hóa Quận 1",
-    category: "education",
-    participants: 15,
-    maxParticipants: 30,
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export const FeaturedEvents = () => {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .eq('status', 'approved')
+          .order('event_date', { ascending: true })
+          .limit(4);
+
+        if (error) throw error;
+        setEvents(data || []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 flex justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -54,11 +49,28 @@ export const FeaturedEvents = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sampleEvents.map((event) => (
-            <EventCard key={event.id} {...event} />
-          ))}
-        </div>
+        {events.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {events.map((event) => (
+              <EventCard 
+                key={event.id} 
+                id={event.id}
+                title={event.title}
+                description={event.description}
+                date={event.event_date}
+                location={event.location}
+                category={event.category}
+                currentParticipants={event.current_participants}
+                maxParticipants={event.max_participants}
+                imageUrl={event.image_url}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground">
+            Chưa có sự kiện nào được duyệt
+          </div>
+        )}
       </div>
     </section>
   );
